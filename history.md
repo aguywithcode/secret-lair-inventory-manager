@@ -68,6 +68,12 @@ The MTG Inventory Manager is a tool designed to help Magic: The Gathering collec
     - Improved error handling with optional stack traces
     - More consistent user feedback across all operations
 
+11. Logging refinements:
+    - Reclassified card matching logs as debug level
+    - Added summary statistics at info level
+    - Better separation between normal and verbose output
+    - Enhanced debugging information for card range processing
+
 ## Current Components
 
 - `scripts/scrape_secret_lairs.py`: Scrapes Secret Lair drop data from MTG Wiki
