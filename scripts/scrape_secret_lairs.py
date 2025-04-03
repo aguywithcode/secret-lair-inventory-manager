@@ -5,20 +5,25 @@ from bs4 import BeautifulSoup
 import json
 import re
 import os
+import logging
+import argparse
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 def load_scryfall_data(filepath="data/scryfall_data.json"):
     """Load the Scryfall card data from the JSON file"""
-    print(f"Loading Scryfall data from {filepath}...")
+    logger.info(f"Loading Scryfall data from {filepath}...")
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            print(f"Loaded {len(data)} cards from Scryfall data")
+            logger.info(f"Loaded {len(data)} cards from Scryfall data")
             return data
     except FileNotFoundError:
-        print(f"Error: Scryfall data file not found at {filepath}")
+        logger.error(f"Error: Scryfall data file not found at {filepath}")
         return None
     except json.JSONDecodeError:
-        print(f"Error: Invalid JSON in Scryfall data file")
+        logger.error(f"Error: Invalid JSON in Scryfall data file")
         return None
 
 def parse_card_number_range(card_numbers_str):
@@ -55,7 +60,7 @@ def parse_card_number_range(card_numbers_str):
                 set_code = start_set
             # Ensure sets match
             elif set_code != start_set or start_set != end_set:
-                print(f"Warning: Set code mismatch in {part}")
+                logger.warning(f"Set code mismatch in {part}")
                 continue
                 
             # Add all numbers in the range to our list
@@ -71,7 +76,7 @@ def parse_card_number_range(card_numbers_str):
             # If we don't have a set code yet, use the default (SLD)
             if set_code is None:
                 set_code = default_set_code
-                print(f"Using default set code '{set_code}' for range {part}")
+                logger.debug(f"Using default set code '{set_code}' for range {part}")
                 
             # Add all numbers in the range to our list
             all_numbers.extend(range(start_num, end_num + 1))
@@ -88,7 +93,7 @@ def parse_card_number_range(card_numbers_str):
                 set_code = current_set
             # Ensure sets match
             elif set_code != current_set:
-                print(f"Warning: Set code mismatch in {part}")
+                logger.warning(f"Set code mismatch in {part}")
                 continue
                 
             # Add this number to our list
@@ -103,7 +108,7 @@ def parse_card_number_range(card_numbers_str):
             # If we don't have a set code yet, use the default (SLD)
             if set_code is None:
                 set_code = default_set_code
-                print(f"Using default set code '{set_code}' for number {num}")
+                logger.debug(f"Using default set code '{set_code}' for number {num}")
                 
             # Add this number to our list
             all_numbers.append(num)
@@ -113,14 +118,14 @@ def parse_card_number_range(card_numbers_str):
     if all_numbers and set_code:
         # Sort and remove duplicates
         all_numbers = sorted(list(set(all_numbers)))
-        print(f"Identified set {set_code} with collector numbers: {all_numbers}")
+        logger.debug(f"Identified set {set_code} with collector numbers: {all_numbers}")
         return {
             'type': 'list',
             'set': set_code,
             'numbers': all_numbers
         }
     
-    print(f"Warning: Could not parse card number format: {card_numbers_str}")
+    logger.warning(f"Could not parse card number format: {card_numbers_str}")
     return None
 
 def find_matching_cards(scryfall_data, card_range):
@@ -134,11 +139,11 @@ def find_matching_cards(scryfall_data, card_range):
     # SLD set code in Scryfall is lowercase
     scryfall_set_code = set_code.lower()
     
-    print(f"Looking for cards in set '{scryfall_set_code}' with numbers: {card_range['numbers'] if 'numbers' in card_range else '?'}")
+    logger.debug(f"Looking for cards in set '{scryfall_set_code}' with numbers: {card_range['numbers'] if 'numbers' in card_range else '?'}")
     
     # Filter to just SLD cards first for efficiency
     sld_cards = [card for card in scryfall_data if card.get('set', '') == scryfall_set_code]
-    print(f"Found {len(sld_cards)} cards with set code '{scryfall_set_code}'")
+    logger.debug(f"Found {len(sld_cards)} cards with set code '{scryfall_set_code}'")
     
     for card in sld_cards:
         collector_number = card.get('collector_number', '')
@@ -153,20 +158,20 @@ def find_matching_cards(scryfall_data, card_range):
         
         # Check if this card's number is in our list
         if card_range['type'] == 'list' and card_num in card_range['numbers']:
-            print(f"Matched: {card.get('name')} #{collector_number}")
+            logger.debug(f"Matched: {card.get('name')} #{collector_number}")
             matching_cards.append(card)
     
-    print(f"Found {len(matching_cards)} matching cards from set {set_code}")
+    logger.debug(f"Found {len(matching_cards)} matching cards from set {set_code}")
     return matching_cards
 
 def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryfall_data.json"):
-    print("Scraping Secret Lair data...")
+    logger.info("Scraping Secret Lair data...")
     url = "https://mtg.wiki/page/Secret_Lair/Drop_Series"
     
     # Send HTTP request to the URL
     response = requests.get(url)
     if response.status_code != 200:
-        print(f"Failed to retrieve the page: Status code {response.status_code}")
+        logger.error(f"Failed to retrieve the page: Status code {response.status_code}")
         return None
     
     # Parse HTML content
@@ -175,7 +180,7 @@ def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryf
     # Find the table containing Secret Lair data
     tables = soup.find_all('table', class_='wikitable')
     if not tables:
-        print("Could not find any tables on the page")
+        logger.error("Could not find any tables on the page")
         return None
     
     # Assuming the main Secret Lair table is the first matching table
@@ -186,7 +191,7 @@ def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryf
     if match_with_scryfall:
         scryfall_data = load_scryfall_data(scryfall_filepath)
         if not scryfall_data:
-            print("Warning: Could not load Scryfall data. Proceeding without card matching.")
+            logger.warning("Could not load Scryfall data. Proceeding without card matching.")
             match_with_scryfall = False
     
     # Initialize list to store all Secret Lair drops
@@ -216,6 +221,7 @@ def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryf
             if match_with_scryfall and scryfall_data:
                 card_range = parse_card_number_range(card_numbers)
                 if card_range:
+                    logger.debug(f"Processing card range for drop: {name}")
                     matching_cards = find_matching_cards(scryfall_data, card_range)
                     
                     # Add basic card info to our Secret Lair object
@@ -240,11 +246,17 @@ def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryf
                         })
                     
                     secret_lair["cards"] = card_list
+                    if card_list:
+                        logger.debug(f"Added {len(card_list)} cards to drop: {name}")
             
             # Add to our list
             secret_lairs.append(secret_lair)
     
-    print(f"Found {len(secret_lairs)} Secret Lair drops")
+    matched_card_count = sum(len(drop.get("cards", [])) for drop in secret_lairs)
+    if matched_card_count > 0:
+        logger.info(f"Matched a total of {matched_card_count} cards across all Secret Lair drops")
+    
+    logger.info(f"Found {len(secret_lairs)} Secret Lair drops")
     return secret_lairs
 
 def save_to_json(data, filename="secret_lairs.json", directory="data"):
@@ -256,12 +268,32 @@ def save_to_json(data, filename="secret_lairs.json", directory="data"):
     filepath = os.path.join(directory, filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"Data saved to {filepath}")
+    logger.info(f"Data saved to {filepath}")
+
+def setup_logging(verbose=False):
+    """Configure logging based on verbosity level"""
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    # Set third-party loggers to a higher level to reduce noise
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Scrape Secret Lair data from MTG Wiki')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose debug output')
+    args = parser.parse_args()
+    
+    # Set up logging based on verbosity
+    setup_logging(args.verbose)
+    
     # When run directly, match with Scryfall data
     secret_lairs = scrape_secret_lairs(match_with_scryfall=True)
     if secret_lairs:
         save_to_json(secret_lairs)
     else:
-        print("Failed to scrape Secret Lair data")
+        logger.error("Failed to scrape Secret Lair data")

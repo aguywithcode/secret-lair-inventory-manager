@@ -6,7 +6,12 @@ from tqdm import tqdm
 import sys
 import json
 import time
+import logging
+import argparse
 from datetime import datetime, timedelta
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 def get_latest_all_cards_url():
     """
@@ -15,7 +20,7 @@ def get_latest_all_cards_url():
     Returns:
         str: URL of the latest all_cards file, or None if not found
     """
-    print("Fetching information about the latest Scryfall bulk data...")
+    logger.info("Fetching information about the latest Scryfall bulk data...")
     api_url = "https://api.scryfall.com/bulk-data"
     
     try:
@@ -28,15 +33,15 @@ def get_latest_all_cards_url():
         for item in data.get('data', []):
             if item.get('type') == 'all_cards':
                 download_url = item.get('download_uri')
-                print(f"Found latest all_cards data (updated: {item.get('updated_at')})")
-                print(f"Size: {item.get('size') / (1024 * 1024):.2f} MB")
+                logger.info(f"Found latest all_cards data (updated: {item.get('updated_at')})")
+                logger.info(f"Size: {item.get('size') / (1024 * 1024):.2f} MB")
                 return download_url
                 
-        print("Could not find all_cards data in the Scryfall bulk data response")
+        logger.error("Could not find all_cards data in the Scryfall bulk data response")
         return None
         
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching Scryfall bulk data information: {e}")
+        logger.error(f"Error fetching Scryfall bulk data information: {e}")
         return None
 
 def is_file_recent(filepath, hours=24):
@@ -83,8 +88,8 @@ def download_scryfall_data(url=None, directory="data", filename="scryfall_data.j
     if is_file_recent(filepath):
         file_mtime = os.path.getmtime(filepath)
         file_time = datetime.fromtimestamp(file_mtime)
-        print(f"Scryfall data file already exists and is recent (last updated: {file_time.strftime('%Y-%m-%d %H:%M:%S')})")
-        print(f"Skipping download. Use --force flag to override.")
+        logger.info(f"Scryfall data file already exists and is recent (last updated: {file_time.strftime('%Y-%m-%d %H:%M:%S')})")
+        logger.info(f"Skipping download. Use --force flag to override.")
         return filepath
     
     # If no URL is provided, get the latest all_cards URL
@@ -92,11 +97,11 @@ def download_scryfall_data(url=None, directory="data", filename="scryfall_data.j
         url = get_latest_all_cards_url()
         
     if not url:
-        print("No valid URL available for download")
+        logger.error("No valid URL available for download")
         return None
     
-    print(f"Downloading Scryfall bulk data from: {url}")
-    print(f"This file will be saved to: {filepath}")
+    logger.info(f"Downloading Scryfall bulk data from: {url}")
+    logger.info(f"This file will be saved to: {filepath}")
     
     try:
         # Make a streaming GET request
@@ -113,34 +118,47 @@ def download_scryfall_data(url=None, directory="data", filename="scryfall_data.j
             unit='B',
             unit_scale=True,
             unit_divisor=1024,
+            disable=logger.level > logging.INFO  # Only show progress bar if not in debug mode
         ) as progress_bar:
             for data in response.iter_content(chunk_size=1024 * 1024):  # 1MB chunks
                 file.write(data)
                 progress_bar.update(len(data))
         
-        print(f"Download complete! File saved to {filepath}")
+        logger.info(f"Download complete! File saved to {filepath}")
         return filepath
     
     except requests.exceptions.RequestException as e:
-        print(f"Error downloading file: {e}")
+        logger.error(f"Error downloading file: {e}")
         return None
 
+def setup_logging(verbose=False):
+    """Configure logging based on verbosity level"""
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    # Set third-party loggers to a higher level to reduce noise
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 if __name__ == "__main__":
-    # Check for force flag
-    force_download = "--force" in sys.argv or "-f" in sys.argv
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Download Scryfall bulk card data')
+    parser.add_argument('url', nargs='?', help='Optional URL to download from (if not provided, uses Scryfall API)')
+    parser.add_argument('--force', '-f', action='store_true', help='Force download even if recent file exists')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose debug output')
+    args = parser.parse_args()
     
-    # Remove force flags from sys.argv if present
-    sys.argv = [arg for arg in sys.argv if arg not in ("--force", "-f")]
-    
-    # If URL is provided via command line, use that
-    # Otherwise, use the Bulk Data API to get the latest URL
-    url = sys.argv[1] if len(sys.argv) > 1 else None
+    # Set up logging based on verbosity
+    setup_logging(args.verbose)
     
     # If force flag is specified, delete the existing file if it exists
-    if force_download:
+    if args.force:
         filepath = os.path.join("data", "scryfall_data.json")
         if os.path.exists(filepath):
-            print(f"Force flag specified, removing existing file {filepath}")
+            logger.info(f"Force flag specified, removing existing file {filepath}")
             os.remove(filepath)
     
-    download_scryfall_data(url)
+    download_scryfall_data(args.url)
