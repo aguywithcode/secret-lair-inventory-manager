@@ -221,12 +221,22 @@ def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryf
                     # Add basic card info to our Secret Lair object
                     card_list = []
                     for card in matching_cards:
+                        # Get price data from the card object
+                        prices = card.get("prices", {})
+                        
                         card_list.append({
                             "name": card.get("name", "Unknown"),
                             "collector_number": card.get("collector_number", ""),
                             "set": card.get("set", ""),
                             "id": card.get("id", ""),
-                            "image_uri": card.get("image_uris", {}).get("normal", "")
+                            "image_uri": card.get("image_uris", {}).get("normal", ""),
+                            "prices": {
+                                "usd": prices.get("usd"),
+                                "usd_foil": prices.get("usd_foil"),
+                                "eur": prices.get("eur"),
+                                "eur_foil": prices.get("eur_foil"),
+                                "tix": prices.get("tix")
+                            }
                         })
                     
                     secret_lair["cards"] = card_list
