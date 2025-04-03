@@ -1,0 +1,4 @@
+# MTG Inventory Manager dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+tqdm>=4.65.0
