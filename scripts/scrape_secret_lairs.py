@@ -169,7 +169,7 @@ def scrape_secret_lairs(match_with_scryfall=False, scryfall_filepath="data/scryf
     url = "https://mtg.wiki/page/Secret_Lair/Drop_Series"
     
     # Send HTTP request to the URL
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     if response.status_code != 200:
         logger.error(f"Failed to retrieve the page: Status code {response.status_code}")
         return None
