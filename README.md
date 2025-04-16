@@ -124,14 +124,42 @@ The web interface provides the following REST API endpoints:
 
 ## Contributing
 
-Contributions are welcome! Here's how you can contribute:
+We welcome contributions to the MTG Inventory Manager project! Here's how you can help:
+
+### Setting Up Development Environment
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add some amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
+2. Clone your fork: `git clone https://github.com/yourusername/mtg_inventory_manager.git`
+3. Install dependencies: `pip install -r requirements.txt`
+4. Set up the data: `python init_data.py`
+5. Run the development server: `python run_web.py --debug`
+
+### Contribution Guidelines
+
+1. **Create an Issue**: For new features or bugs, start by creating an issue to discuss it
+2. **Branch Naming**: Use descriptive branch names (`feature/collection-tracking`, `bugfix/price-display`)
+3. **Code Style**: Follow PEP 8 style guidelines for Python code
+4. **Documentation**: Update documentation for any changes to functionality
+5. **Testing**: Add tests for new features and ensure existing tests pass
+6. **Commit Messages**: Write clear commit messages that explain the changes
+
+### Pull Request Process
+
+1. Update the README.md or other documentation if needed
+2. Update the history.md file with a description of your changes
+3. Submit the Pull Request with a clear description of the changes
+4. Address any feedback from the code review
+
+### Getting Help
+
+If you need help with contributing, feel free to:
+- Open an issue with questions
+- Ask for clarification on existing issues
+- Reach out to the maintainers
+
+## Future Development
+
+See our [Development Roadmap](roadmap.md) for planned features and improvements.
 
 ## License
 
