@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Secret Lairs - MTG Inventory Manager{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Secret Lair Drops</h1>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="secretLairCards">
+    {% for secret_lair in secret_lairs %}
+    <div class="col secret-lair-item">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="card-title mb-0">{{ secret_lair.name }}</h5>
+            </div>
+            
+            <div class="card-body">
+                <p class="card-text"><strong>Drop #:</strong> {{ secret_lair.drop_number }}</p>
+                <p class="card-text"><strong>Card Numbers:</strong> {{ secret_lair.card_numbers }}</p>
+                
+                {% if secret_lair.cards %}
+                <hr>
+                <div class="row">
+                    {% set displayed_cards = [] %}
+                    {% for card in secret_lair.cards %}
+                        {% if loop.index <= 3 %}
+                            {% set _ = displayed_cards.append(card) %}
+                            <div class="col-4">
+                                <img src="{{ card.image_uri }}" class="img-fluid rounded card-preview" alt="{{ card.name }}">
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <p class="mt-3 mb-0">
+                    <strong>Cards:</strong> {{ secret_lair.cards|length }}
+                    {% if secret_lair.cards|length > 0 %}
+                    | 
+                    <strong>Foil Value:</strong> 
+                    {% set foil_total = namespace(value=0) %}
+                    {% for card in secret_lair.cards %}
+                        {% if card.prices.usd_foil %}
+                            {% set foil_total.value = foil_total.value + (card.prices.usd_foil|float) %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ format_price(foil_total.value) }}
+                    
+                    | <strong>Regular Value:</strong> 
+                    {% set regular_total = namespace(value=0) %}
+                    {% for card in secret_lair.cards %}
+                        {% if card.prices.usd %}
+                            {% set regular_total.value = regular_total.value + (card.prices.usd|float) %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ format_price(regular_total.value) }}
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+            
+            <div class="card-footer">
+                <a href="{{ url_for('secret_lair_detail', drop_number=secret_lair.drop_number) }}" class="btn btn-primary">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not secret_lairs %}
+<div class="alert alert-info">
+    <p>No Secret Lair data found. Please run the data initialization script first:</p>
+    <pre>python init_data.py</pre>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const secretLairItems = document.querySelectorAll('.secret-lair-item');
+        
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            filterItems();
+        });
+        
+        searchInput.addEventListener('input', filterItems);
+        
+        function filterItems() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            secretLairItems.forEach(item => {
+                const title = item.querySelector('.card-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
