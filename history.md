@@ -74,12 +74,23 @@ The MTG Inventory Manager is a tool designed to help Magic: The Gathering collec
     - Better separation between normal and verbose output
     - Enhanced debugging information for card range processing
 
+12. Web UI implementation:
+    - Created Flask-based web application for browsing Secret Lairs
+    - Implemented responsive design with Bootstrap
+    - Added card preview and price information display
+    - Included search functionality for Secret Lair drops
+    - Created REST API endpoints for programmatic access to data
+
 ## Current Components
 
 - `scripts/scrape_secret_lairs.py`: Scrapes Secret Lair drop data from MTG Wiki
 - `scripts/download_scryfall_data.py`: Downloads latest card data from Scryfall API
 - `scripts/initialize_data.py`: Combined script to set up all required data
-- `init_data.py`: Simple launcher script in the root directory
+- `web/app.py`: Flask web application for browsing Secret Lair data
+- `web/templates/`: HTML templates for the web interface
+- `web/static/`: CSS and JavaScript assets for the web interface
+- `init_data.py`: Launcher script for data initialization
+- `run_web.py`: Launcher script for the web interface
 - `requirements.txt`: Python package dependencies
 - `.gitignore`: Configuration to exclude data and temporary files
 

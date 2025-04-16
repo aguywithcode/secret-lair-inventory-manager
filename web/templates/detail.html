@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ secret_lair.name }} - MTG Inventory Manager{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ secret_lair.name }}</li>
+    </ol>
+</nav>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h1 class="mb-0">{{ secret_lair.name }}</h1>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Drop Number:</strong> {{ secret_lair.drop_number }}</p>
+                <p><strong>Card Numbers:</strong> {{ secret_lair.card_numbers }}</p>
+            </div>
+            <div class="col-md-6">
+                {% if secret_lair.cards %}
+                <div class="card">
+                    <div class="card-header">Value Summary</div>
+                    <div class="card-body">
+                        <p><strong>Total Cards:</strong> {{ secret_lair.cards|length }}</p>
+                        
+                        {% set foil_total = namespace(value=0) %}
+                        {% for card in secret_lair.cards %}
+                            {% if card.prices.usd_foil %}
+                                {% set foil_total.value = foil_total.value + (card.prices.usd_foil|float) %}
+                            {% endif %}
+                        {% endfor %}
+                        <p><strong>Total Foil Value:</strong> {{ format_price(foil_total.value) }}</p>
+                        
+                        {% set regular_total = namespace(value=0) %}
+                        {% for card in secret_lair.cards %}
+                            {% if card.prices.usd %}
+                                {% set regular_total.value = regular_total.value + (card.prices.usd|float) %}
+                            {% endif %}
+                        {% endfor %}
+                        <p><strong>Total Regular Value:</strong> {{ format_price(regular_total.value) }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if secret_lair.cards %}
+<h2 class="mb-4">Cards in this Drop</h2>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for card in secret_lair.cards %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ card.name }}</h5>
+            </div>
+            <img src="{{ card.image_uri }}" class="card-img-top p-2" alt="{{ card.name }}">
+            <div class="card-body">
+                <p><strong>Collector Number:</strong> {{ card.collector_number }}</p>
+                <p><strong>Set:</strong> {{ card.set|upper }}</p>
+                <hr>
+                <p><strong>Regular Price:</strong> {{ format_price(card.prices.usd) }}</p>
+                <p><strong>Foil Price:</strong> {{ format_price(card.prices.usd_foil) }}</p>
+            </div>
+            <div class="card-footer">
+                <a href="https://scryfall.com/card/{{ card.set }}/{{ card.collector_number }}" target="_blank" class="btn btn-outline-primary">View on Scryfall</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-warning">
+    No card data available for this Secret Lair drop.
+</div>
+{% endif %}
+{% endblock %}
