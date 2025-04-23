@@ -125,6 +125,54 @@ You can also run the individual scripts directly:
   python scripts/scrape_secret_lairs.py [--verbose]
   ```
 
+## Docker Deployment
+
+The application can be easily deployed using Docker:
+
+### Using Docker Compose (Recommended)
+
+1. Build and start the container:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. Access the web interface at `http://localhost:5000`
+
+3. Stop the container:
+   ```bash
+   docker-compose down
+   ```
+
+### Using Docker Directly
+
+1. Build the Docker image:
+   ```bash
+   docker build -t mtg-inventory-manager .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -d -p 5000:5000 -v "$(pwd)/data:/app/data" --name mtg-inventory-manager mtg-inventory-manager
+   ```
+
+3. Access the web interface at `http://localhost:5000`
+
+4. Stop the container:
+   ```bash
+   docker stop mtg-inventory-manager
+   docker rm mtg-inventory-manager
+   ```
+
+### Docker Configuration
+
+- The container automatically downloads Scryfall data and scrapes Secret Lair information on startup
+- Data is persisted in a volume mapped to the local `./data` directory
+- The web interface is available on port 5000
+- The container includes all dependencies:
+  - Python 3.12 with required packages
+  - Git for version control
+  - Node.js and ESLint for JavaScript support
+
 ## Testing
 
 The project includes a comprehensive test suite using pytest:
