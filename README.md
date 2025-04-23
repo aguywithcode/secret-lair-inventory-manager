@@ -54,6 +54,37 @@ The **MTG Inventory Manager** helps collectors track their Magic: The Gathering 
    ```
    This will download the latest Scryfall data and scrape Secret Lair information.
 
+### Development with VS Code Devcontainer
+
+This project includes a devcontainer configuration for seamless development in Visual Studio Code.
+
+#### Prerequisites
+- [VS Code](https://code.visualstudio.com/) installed
+- [Docker](https://www.docker.com/products/docker-desktop) installed and running
+- [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed in VS Code
+
+#### Setup with Devcontainer
+1. Open the project folder in VS Code
+2. When prompted, click "Reopen in Container", or run the "Remote-Containers: Reopen in Container" command from the command palette
+3. VS Code will build the container and set up the development environment automatically
+4. Once the container is ready, all dependencies will be installed and the environment will be fully configured
+
+#### Features
+The devcontainer comes with:
+- Python 3.12 with pip pre-installed
+- Git pre-installed and configured 
+- Node.js and npm pre-installed for JavaScript development
+- VS Code extensions for Python and JavaScript development
+- Port forwarding for the web application (port 5000)
+- Automatic dependency installation from requirements.txt
+
+#### Running the Application
+Once in the devcontainer, you can initialize data and run the web server using the same commands:
+```bash
+python init_data.py
+python run_web.py
+```
+
 ## Usage
 
 ### Data Management
