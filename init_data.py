@@ -4,12 +4,8 @@ import sys
 import os
 import argparse
 
-# Add the scripts directory to the path
-script_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts')
-sys.path.append(script_dir)
-
-# Import from the scripts directory
-from initialize_data import initialize_data_directory
+# Import the initialize_data function directly
+from scripts.initialize_data import initialize_data_directory
 
 if __name__ == "__main__":
     # Parse command line arguments

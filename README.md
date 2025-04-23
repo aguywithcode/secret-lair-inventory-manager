@@ -54,6 +54,37 @@ The **MTG Inventory Manager** helps collectors track their Magic: The Gathering 
    ```
    This will download the latest Scryfall data and scrape Secret Lair information.
 
+### Development with VS Code Devcontainer
+
+This project includes a devcontainer configuration for seamless development in Visual Studio Code.
+
+#### Prerequisites
+- [VS Code](https://code.visualstudio.com/) installed
+- [Docker](https://www.docker.com/products/docker-desktop) installed and running
+- [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed in VS Code
+
+#### Setup with Devcontainer
+1. Open the project folder in VS Code
+2. When prompted, click "Reopen in Container", or run the "Remote-Containers: Reopen in Container" command from the command palette
+3. VS Code will build the container and set up the development environment automatically
+4. Once the container is ready, all dependencies will be installed and the environment will be fully configured
+
+#### Features
+The devcontainer comes with:
+- Python 3.12 with pip pre-installed
+- Git pre-installed and configured 
+- Node.js and npm pre-installed for JavaScript development
+- VS Code extensions for Python and JavaScript development
+- Port forwarding for the web application (port 5000)
+- Automatic dependency installation from requirements.txt
+
+#### Running the Application
+Once in the devcontainer, you can initialize data and run the web server using the same commands:
+```bash
+python init_data.py
+python run_web.py
+```
+
 ## Usage
 
 ### Data Management
@@ -94,6 +125,88 @@ You can also run the individual scripts directly:
   python scripts/scrape_secret_lairs.py [--verbose]
   ```
 
+## Docker Deployment
+
+The application can be easily deployed using Docker:
+
+### Using Docker Compose (Recommended)
+
+1. Build and start the container:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. Access the web interface at `http://localhost:5000`
+
+3. Stop the container:
+   ```bash
+   docker-compose down
+   ```
+
+### Using Docker Directly
+
+1. Build the Docker image:
+   ```bash
+   docker build -t mtg-inventory-manager .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -d -p 5000:5000 -v "$(pwd)/data:/app/data" --name mtg-inventory-manager mtg-inventory-manager
+   ```
+
+3. Access the web interface at `http://localhost:5000`
+
+4. Stop the container:
+   ```bash
+   docker stop mtg-inventory-manager
+   docker rm mtg-inventory-manager
+   ```
+
+### Docker Configuration
+
+- The container automatically downloads Scryfall data and scrapes Secret Lair information on startup
+- Data is persisted in a volume mapped to the local `./data` directory
+- The web interface is available on port 5000
+- The container includes all dependencies:
+  - Python 3.12 with required packages
+  - Git for version control
+  - Node.js and ESLint for JavaScript support
+
+## Testing
+
+The project includes a comprehensive test suite using pytest:
+
+### Setting Up the Test Environment
+
+1. Install test dependencies:
+   ```bash
+   pip install -r tests/requirements-test.txt
+   ```
+
+2. Run all tests:
+   ```bash
+   pytest
+   ```
+
+3. Run tests with coverage report:
+   ```bash
+   pytest --cov
+   ```
+
+4. Generate a detailed HTML coverage report:
+   ```bash
+   pytest --cov --cov-report=html
+   ```
+   This will create a `htmlcov` directory with an interactive coverage report you can view in your browser.
+
+### Test Organization
+
+- `tests/test_download_scryfall_data.py`: Tests for the Scryfall data downloader
+- `tests/test_scrape_secret_lairs.py`: Tests for the Secret Lair data scraper
+- `tests/test_initialize_data.py`: Tests for the data initialization process
+- `tests/test_web_app.py`: Tests for the Flask web application
+
 ## Project Structure
 
 ```
@@ -103,15 +216,20 @@ mtg_inventory_manager/
 │   ├── download_scryfall_data.py
 │   ├── scrape_secret_lairs.py
 │   ├── initialize_data.py
+├── tests/                    # Unit and integration tests
+│   ├── __init__.py
+│   ├── requirements-test.txt
+│   ├── test_*.py             # Test files
 ├── web/                      # Web interface files
 │   ├── app.py                # Flask application
 │   ├── templates/            # HTML templates
 │   ├── static/               # Static files (CSS, JS)
 ├── .gitignore                # Git ignore file
 ├── init_data.py              # Launcher script for data initialization
-├── run_web.py                # Launcher script for the web interface
+├── pytest.ini                # Pytest configuration
 ├── requirements.txt          # Python dependencies
-├── history.md                # Development history
+├── run_web.py                # Launcher script for the web interface
+├── LICENSE                   # License information
 └── README.md                 # This file
 ```
 

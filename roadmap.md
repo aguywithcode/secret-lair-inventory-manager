@@ -70,6 +70,12 @@ This document outlines the planned features and improvements for the MTG Invento
 - Implement Azure Application Insights for monitoring and analytics
 - Create CI/CD pipelines with GitHub Actions or Azure DevOps
 
+### Development Environment
+- Configure standardized development environment using Dev Containers
+- Set up automated testing environment with pytest
+- Implement pre-commit hooks for code quality checks
+- Create documentation generation pipeline
+
 ## Community Suggestions
 
 We welcome community input on prioritizing these features or suggesting new ones. Please submit your ideas via GitHub issues with the "feature request" label.
