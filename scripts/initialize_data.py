@@ -5,9 +5,9 @@ import sys
 import time
 import logging
 import argparse
-# Update imports to use the local module paths
-from download_scryfall_data import download_scryfall_data, setup_logging
-from scrape_secret_lairs import scrape_secret_lairs, save_to_json
+# Update imports to use fully qualified paths
+from scripts.download_scryfall_data import download_scryfall_data, setup_logging
+from scripts.scrape_secret_lairs import scrape_secret_lairs, save_to_json
 
 # Set up logger
 logger = logging.getLogger(__name__)

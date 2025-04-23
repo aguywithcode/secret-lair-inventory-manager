@@ -125,6 +125,40 @@ You can also run the individual scripts directly:
   python scripts/scrape_secret_lairs.py [--verbose]
   ```
 
+## Testing
+
+The project includes a comprehensive test suite using pytest:
+
+### Setting Up the Test Environment
+
+1. Install test dependencies:
+   ```bash
+   pip install -r tests/requirements-test.txt
+   ```
+
+2. Run all tests:
+   ```bash
+   pytest
+   ```
+
+3. Run tests with coverage report:
+   ```bash
+   pytest --cov
+   ```
+
+4. Generate a detailed HTML coverage report:
+   ```bash
+   pytest --cov --cov-report=html
+   ```
+   This will create a `htmlcov` directory with an interactive coverage report you can view in your browser.
+
+### Test Organization
+
+- `tests/test_download_scryfall_data.py`: Tests for the Scryfall data downloader
+- `tests/test_scrape_secret_lairs.py`: Tests for the Secret Lair data scraper
+- `tests/test_initialize_data.py`: Tests for the data initialization process
+- `tests/test_web_app.py`: Tests for the Flask web application
+
 ## Project Structure
 
 ```
@@ -134,15 +168,20 @@ mtg_inventory_manager/
 │   ├── download_scryfall_data.py
 │   ├── scrape_secret_lairs.py
 │   ├── initialize_data.py
+├── tests/                    # Unit and integration tests
+│   ├── __init__.py
+│   ├── requirements-test.txt
+│   ├── test_*.py             # Test files
 ├── web/                      # Web interface files
 │   ├── app.py                # Flask application
 │   ├── templates/            # HTML templates
 │   ├── static/               # Static files (CSS, JS)
 ├── .gitignore                # Git ignore file
 ├── init_data.py              # Launcher script for data initialization
-├── run_web.py                # Launcher script for the web interface
+├── pytest.ini                # Pytest configuration
 ├── requirements.txt          # Python dependencies
-├── history.md                # Development history
+├── run_web.py                # Launcher script for the web interface
+├── LICENSE                   # License information
 └── README.md                 # This file
 ```
 
