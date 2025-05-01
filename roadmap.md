@@ -75,6 +75,7 @@ This document outlines the planned features and improvements for the MTG Invento
 - Set up automated testing environment with pytest
 - Implement pre-commit hooks for code quality checks
 - Create documentation generation pipeline
+- Configure infrastructure-as-code using Terraform for Azure resources
 
 ## Community Suggestions
 
