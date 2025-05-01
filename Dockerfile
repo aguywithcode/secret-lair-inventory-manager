@@ -24,14 +24,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 # Copy requirements files
 COPY requirements.txt .
-COPY tests/requirements-test.txt ./tests/
+COPY src/tests/requirements-test.txt ./tests/
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt \
     && pip3 install --no-cache-dir -r tests/requirements-test.txt
 
 # Copy application code
-COPY . .
+COPY src/ .
 
 # Run data initialization on container start
 CMD ["sh", "-c", "python3 init_data.py && python3 run_web.py --host=0.0.0.0"]
