@@ -9,6 +9,11 @@
 		},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts"
+		},
+		"ghcr.io/devcontainers/features/terraform:1": {
+			"version": "latest",
+			"tflint": "latest",
+			"terragrunt": "latest"
 		}
 	},
 	"forwardPorts": [5000],
@@ -20,7 +25,9 @@
 				"ms-python.vscode-pylance",
 				"dbaeumer.vscode-eslint",
 				"ms-azuretools.vscode-docker",
-				"esbenp.prettier-vscode"
+				"esbenp.prettier-vscode",
+				"hashicorp.terraform",
+				"4ops.terraform"
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/local/bin/python",
