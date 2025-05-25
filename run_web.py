@@ -13,6 +13,9 @@ def run_web_ui(host='127.0.0.1', port=5000, debug=False):
         host (str): Host to bind to
         port (int): Initial port to try
         debug (bool): Whether to run in debug mode
+    
+    Returns:
+        int: Exit code - 0 on success, 1 on failure (import errors, port conflicts, etc.)
     """
     # Add the project root to the path
     web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
